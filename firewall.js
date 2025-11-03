@@ -1,4 +1,4 @@
-// 🔥 Firewall Simulation + Admin Controls
+// 🔥 Firewall Simulation + Admin Controls + Toast Notifications
 
 // === CONFIG ===
 const ADMIN_IP = "104.28.244.253"; // ← replace with your actual public IP
@@ -25,6 +25,9 @@ const LS_CURRENT = "currentIP";
       const unlock = document.getElementById("unlockAdmin");
       unlock.style.display = "block";
       unlock.addEventListener("click", toggleAdminPanel);
+      showToast(`👑 Admin access granted (${ip})`, "green");
+    } else {
+      showToast(`🌐 Visitor IP detected: ${ip}`, "blue");
     }
 
     // Check firewall blocks
@@ -38,6 +41,7 @@ const LS_CURRENT = "currentIP";
       addLog(ip);
       playAlertSound();
       showBlockOverlay(ip);
+      showToast(`🚫 IP Blocked: ${ip}`, "red");
     }
   } catch (err) {
     console.warn("IP check failed:", err);
@@ -50,8 +54,10 @@ function toggleAdminPanel() {
   if (panel.style.display === "none" || !panel.style.display) {
     panel.style.display = "block";
     renderAdmin();
+    showToast("🛠 Admin panel opened", "green");
   } else {
     panel.style.display = "none";
+    showToast("❌ Admin panel closed", "gray");
   }
 }
 
@@ -68,13 +74,11 @@ function renderBlockedList() {
 
   const dynamic = JSON.parse(localStorage.getItem(LS_DYNAMIC)) || [];
 
-  // Static
   container.innerHTML += `<em style="color:#ffb0a0;">Static rules:</em><br>`;
   staticBlocked.forEach(ip => {
     container.innerHTML += `<div style="color:#ff6b6b; margin:4px 0;">${ip} <small style="opacity:0.6;">(static)</small></div>`;
   });
 
-  // Dynamic
   if (dynamic.length > 0) {
     container.innerHTML += `<br><em style="color:#ffd8b0;">Dynamic rules:</em><br>`;
     dynamic.forEach(ip => {
@@ -88,10 +92,11 @@ function renderBlockedList() {
     container.innerHTML += `<div style="color:#aaa; margin-top:8px;">No dynamic IPs.</div>`;
   }
 
-  // Bind unblock buttons
   document.querySelectorAll(".unblockBtn").forEach(btn => {
     btn.addEventListener("click", e => {
-      removeDynamicIP(e.target.dataset.ip);
+      const ip = e.target.dataset.ip;
+      removeDynamicIP(ip);
+      showToast(`✅ Unblocked ${ip}`, "green");
       renderAdmin();
     });
   });
@@ -118,6 +123,7 @@ function renderLogs() {
   document.querySelectorAll(".removeLogBtn").forEach(btn => {
     btn.addEventListener("click", e => {
       removeLog(e.target.dataset.ip, e.target.dataset.time);
+      showToast(`🗑 Log removed`, "gray");
       renderAdmin();
     });
   });
@@ -138,13 +144,14 @@ function renderButtons() {
     document.getElementById("testFirewallBtn").addEventListener("click", () => {
       playAlertSound();
       showBlockOverlay("TEST-IP");
+      showToast("⚡ Firewall test triggered", "yellow");
     });
 
     document.getElementById("blockIPBtn").addEventListener("click", () => {
       const ip = prompt("Enter IP to block:");
       if (ip) {
         addDynamicIP(ip);
-        alert(`${ip} added to dynamic blocklist.`);
+        showToast(`🚫 Blocked ${ip}`, "red");
         renderAdmin();
       }
     });
@@ -208,5 +215,34 @@ function showBlockOverlay(ip) {
   document.body.appendChild(overlay);
 }
 
+// === TOAST NOTIFICATIONS ===
+function showToast(msg, color = "gray") {
+  const toast = document.createElement("div");
+  toast.textContent = msg;
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.right = "20px";
+  toast.style.background =
+    color === "red" ? "#ff4d4d" :
+    color === "green" ? "#4caf50" :
+    color === "blue" ? "#2196f3" :
+    color === "yellow" ? "#ff9800" : "#555";
+  toast.style.color = "#fff";
+  toast.style.padding = "10px 15px";
+  toast.style.borderRadius = "8px";
+  toast.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+  toast.style.zIndex = "999999";
+  toast.style.fontFamily = "monospace";
+  toast.style.opacity = "0";
+  toast.style.transition = "opacity 0.4s ease";
+
+  document.body.appendChild(toast);
+  setTimeout(() => (toast.style.opacity = "1"), 50);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+
 // === EXPORT ===
-window.__firewall = { addDynamicIP, removeDynamicIP, renderAdmin };
+window.__firewall = { addDynamicIP, removeDynamicIP, renderAdmin, showToast };
