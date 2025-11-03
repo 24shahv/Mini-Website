@@ -1,28 +1,26 @@
-// 🔥 Advanced Firewall Simulation Script (with Admin Panel + Sound)
+// 🔥 Advanced Firewall Simulation Script (with Admin Slide Panel + Sound)
 
-// CONFIG
-const ADMIN_IP = "104.28.244.253"; // 👈 replace this with your real public IP
+const ADMIN_IP = "104.28.244.253"; // ⚙️ Replace this with your real public IP
 const staticBlocked = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
 const suspiciousRanges = [/^45\.90\./, /^103\.21\./];
 
-// Live IP Fetch
+// Fetch user's public IP
 fetch("https://api.ipify.org?format=json")
   .then(res => res.json())
   .then(data => {
     const userIP = data.ip;
     console.log("User IP detected:", userIP);
 
-    // Show admin tools if IP matches
+    // Show admin access if IP matches
     if (userIP === ADMIN_IP) {
-      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("adminAccess").style.display = "block";
       console.log("🧠 Admin mode activated");
     }
 
     const dynamicBlocked = JSON.parse(localStorage.getItem("dynamicBlocked")) || [];
     const allBlocked = [...staticBlocked, ...dynamicBlocked];
 
-    // Check if blocked
-    let blocked = allBlocked.includes(userIP) || suspiciousRanges.some(r => r.test(userIP));
+    const blocked = allBlocked.includes(userIP) || suspiciousRanges.some(r => r.test(userIP));
 
     if (blocked && userIP !== ADMIN_IP) {
       playAlertSound();
@@ -34,13 +32,28 @@ fetch("https://api.ipify.org?format=json")
   })
   .catch(err => console.error("IP check failed:", err));
 
-// 🧠 Add dynamic block from admin input
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("blockIPBtn");
-  const input = document.getElementById("blockIPInput");
+// 🧠 Admin Access Toggle
+document.getElementById("adminAccess").addEventListener("click", async () => {
+  const res = await fetch("https://api.ipify.org?format=json");
+  const { ip } = await res.json();
+  if (ip === ADMIN_IP) toggleAdminPanel();
+  else alert("⛔ Unauthorized access attempt!");
+});
 
-  if (btn) {
-    btn.addEventListener("click", () => {
+function toggleAdminPanel() {
+  const panel = document.getElementById("adminPanel");
+  panel.classList.toggle("active");
+}
+
+// 🧩 Admin Panel Buttons
+document.addEventListener("DOMContentLoaded", () => {
+  const blockBtn = document.getElementById("blockIPBtn");
+  const input = document.getElementById("blockIPInput");
+  const viewLogs = document.getElementById("viewLogsBtn");
+  const clearLogs = document.getElementById("clearLogsBtn");
+
+  if (blockBtn) {
+    blockBtn.addEventListener("click", () => {
       const ip = input.value.trim();
       if (!ip) return alert("Enter a valid IP!");
       let dynamicBlocked = JSON.parse(localStorage.getItem("dynamicBlocked")) || [];
@@ -49,28 +62,32 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("dynamicBlocked", JSON.stringify(dynamicBlocked));
         alert(`✅ IP ${ip} added to blocklist!`);
         input.value = "";
-      } else {
-        alert(`⚠️ IP ${ip} is already blocked.`);
-      }
+      } else alert(`⚠️ IP ${ip} already blocked.`);
     });
   }
+
+  if (viewLogs) viewLogs.addEventListener("click", () => window.location.href = "blocked.html");
+  if (clearLogs) clearLogs.addEventListener("click", () => {
+    localStorage.removeItem("firewallLogs");
+    alert("🧹 Logs cleared successfully!");
+  });
 });
 
 // 🧱 Logs
 function logBlockedIP(ip) {
-  let logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
+  const logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
   logs.push({ ip, time: new Date().toLocaleString() });
   localStorage.setItem("firewallLogs", JSON.stringify(logs));
 }
 
-// 🔊 Sound
+// 🔊 Sound Effect
 function playAlertSound() {
   const audio = new Audio("alert.mp3");
   audio.volume = 0.7;
   audio.play().catch(err => console.warn("Audio play blocked:", err));
 }
 
-// 🚫 Overlay
+// 🚫 Overlay for Blocked IPs
 function showBlockOverlay(ip) {
   const overlay = document.createElement("div");
   overlay.style = `
