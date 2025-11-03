@@ -1,65 +1,70 @@
-// 🔥 Advanced Firewall Simulation Script (with Sound Effects)
+// 🔥 Advanced Firewall Simulation Script (with Admin Mode + Sound Effects)
 
-// Live IP Fetch
+// === CONFIG ===
+const ADMIN_IP = "104.28.244.253"; // 👈 Replace this with *your actual IP* (from console)
+const ALERT_SOUND = "alert.mp3"; // must be in same folder
+
+// === Live IP Fetch ===
 fetch("https://api.ipify.org?format=json")
   .then(res => res.json())
   .then(data => {
     const userIP = data.ip;
     console.log("User IP detected:", userIP);
 
+    // 🔐 Show test button only if admin
+    if (userIP === ADMIN_IP) {
+      document.getElementById("testFirewall").style.display = "block";
+      console.log("Admin detected — firewall test access granted.");
+      setupAdminButton();
+    }
+
     // Simulate blocked IPs or suspicious patterns
     const blockedIPs = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
-    const suspiciousRanges = [/^45\.90\./, /^103\.21\./]; // regex match for ranges
+    const suspiciousRanges = [/^45\.90\./, /^103\.21\./]; // regex for IP ranges
 
     let blocked = false;
 
     if (blockedIPs.includes(userIP)) blocked = true;
     else if (suspiciousRanges.some((r) => r.test(userIP))) blocked = true;
 
-    // If IP is blocked
+    // 🚫 If IP is blocked
     if (blocked) {
-      playAlertSound(); // 🔊 play alert sound
+      playAlertSound();
       logBlockedIP(userIP);
       showBlockOverlay(userIP);
     } else {
-      console.log("Access granted ✅");
+      console.log("✅ Access granted — Firewall clear");
     }
   })
   .catch(err => {
     console.error("IP check failed:", err);
   });
 
-// 🧠 Store blocked IPs (simulated)
+// === Store blocked IPs (simulated) ===
 function logBlockedIP(ip) {
   let logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
   logs.push({ ip, time: new Date().toLocaleString() });
   localStorage.setItem("firewallLogs", JSON.stringify(logs));
 }
 
-// 🎵 Play alert sound
+// === Play alert sound ===
 function playAlertSound() {
-  const audio = new Audio("alert.mp3"); // sound file (place it in same folder)
+  const audio = new Audio(ALERT_SOUND);
   audio.volume = 0.7;
-  audio.play().catch((err) => console.warn("Audio play blocked by browser:", err));
+  audio.play().catch(err => console.warn("Audio play blocked by browser:", err));
 }
 
-// 🚫 Animated block overlay
+// === Show block overlay ===
 function showBlockOverlay(ip) {
   const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.justifyContent = "center";
-  overlay.style.alignItems = "center";
-  overlay.style.color = "#ff3b3b";
-  overlay.style.fontFamily = "Courier New, monospace";
-  overlay.style.zIndex = 9999;
-  overlay.style.transition = "opacity 1s ease";
+  overlay.style = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.95);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    color: #ff3b3b; font-family: 'Courier New', monospace;
+    z-index: 9999; transition: opacity 1s ease;
+  `;
 
   overlay.innerHTML = `
     <h1 style="font-size:2.5rem;">🚨 Access Denied</h1>
@@ -73,5 +78,16 @@ function showBlockOverlay(ip) {
 
   document.getElementById("view-logs").addEventListener("click", () => {
     window.location.href = "blocked.html";
+  });
+}
+
+// === Admin Button Functionality ===
+function setupAdminButton() {
+  const btn = document.getElementById("testFirewall");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    playAlertSound();
+    showBlockOverlay("Simulated Admin Test IP");
   });
 }
