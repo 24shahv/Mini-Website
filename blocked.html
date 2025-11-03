@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocked Logs | Firewall System</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #ff3b3b;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding-top: 60px;
+    }
+    h1 { color: #fff; }
+    table {
+      margin: 40px auto;
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 600px;
+      color: #fff;
+    }
+    td, th {
+      border: 1px solid #555;
+      padding: 10px;
+    }
+    th {
+      background-color: #222;
+    }
+    button {
+      background: #ff3b3b;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧱 Blocked IP Log</h1>
+  <p>Below are the recorded IPs that were denied access:</p>
+
+  <table id="log-table">
+    <tr><th>IP Address</th><th>Time</th></tr>
+  </table>
+
+  <button onclick="clearLogs()">Clear Logs</button>
+  <button onclick="window.location.href='index.html'">Back to Home</button>
+
+  <script>
+    const logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
+    const table = document.getElementById("log-table");
+
+    logs.forEach(log => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${log.ip}</td><td>${log.time}</td>`;
+      table.appendChild(row);
+    });
+
+    function clearLogs() {
+      localStorage.removeItem("firewallLogs");
+      alert("Logs cleared!");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
