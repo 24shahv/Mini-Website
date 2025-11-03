@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Firewall Security</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -36,20 +36,32 @@
   </footer>
 
   <!-- 🔓 Admin Access Button (bottom-right) -->
-  <button id="unlockAdmin">🧠 Admin</button>
+  <button id="unlockAdmin" style="display:none; position:fixed; right:20px; bottom:20px; background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; z-index:9999;">
+    🧠 Admin
+  </button>
 
   <!-- 🧠 Admin Panel (Permanent once opened) -->
-  <div id="adminPanel" style="display:none;">
-    <h3>Admin Control Panel</h3>
+  <div id="adminPanel" style="display:none; position:fixed; right:20px; bottom:80px; width:360px; max-height:70vh; overflow:auto; background:#0b0b0b; border:1px solid #333; border-radius:10px; padding:14px; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.6); color:#fff;">
+    <h3 style="margin:0 0 10px;color:#ff3b3b;">Admin Control Panel</h3>
 
-    <h4>Add IP to Blocklist</h4>
-    <input type="text" id="blockIPInput" placeholder="Enter IP..." />
-    <button id="blockIPBtn">Block IP</button>
+    <!-- Blocked lists -->
+    <section style="margin-bottom:12px;">
+      <strong>Blocked IPs</strong>
+      <div id="blockedList" style="margin-top:8px; font-family:monospace; font-size:13px;"></div>
+    </section>
 
-    <br><br>
-    <h4>Firewall Utilities</h4>
-    <button id="viewLogsBtn" onclick="window.location.href='blocked.html'">View Logs</button>
-    <button id="testFirewallBtn">Test Firewall</button>
+    <!-- Logs viewer -->
+    <section style="margin-bottom:6px;">
+      <strong>Blocked Logs (recent)</strong>
+      <div id="logsList" style="margin-top:8px; font-family:monospace; font-size:13px;"></div>
+    </section>
+
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button id="refreshAdmin" style="flex:1; background:#ff3b3b; border:none; color:#fff; padding:8px; border-radius:6px; cursor:pointer;">Refresh</button>
+      <button id="clearDynamic" style="flex:1; background:#666; border:none; color:#fff; padding:8px; border-radius:6px; cursor:pointer;">Clear Dynamic</button>
+    </div>
+
+    <p style="font-size:12px; color:#bbb; margin-top:10px;">Static rules cannot be removed here. Dynamic blocks and logs are stored in your browser (localStorage).</p>
   </div>
 
   <script src="firewall.js"></script>
