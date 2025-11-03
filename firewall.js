@@ -1,35 +1,69 @@
-// firewall.js
-// Simple client-side firewall simulation (safe for static hosting)
+// 🔥 Advanced Firewall Simulation Script
 
-document.addEventListener("DOMContentLoaded", () => {
-  const blockedWords = ["DROP", "SELECT", "HACK", "SCRIPT"];
-  const blockedIPs = ["45.12.23.9"]; // fake blocked IPs
+// Live IP Fetch
+fetch("https://api.ipify.org?format=json")
+  .then(res => res.json())
+  .then(data => {
+    const userIP = data.ip;
+    console.log("User IP detected:", userIP);
 
-  // Simulate user IP (random demo)
-  const userIP = "192.168.1.101"; // safe local IP placeholder
+    // Simulate blocked IPs or suspicious patterns
+    const blockedIPs = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
+    const suspiciousRanges = [/^45\.90\./, /^103\.21\./]; // regex match for ranges
 
-  // Check if IP is in blocklist
-  if (blockedIPs.includes(userIP)) {
-    document.body.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:black;color:#ff5555;font-family:sans-serif;">
-        <h1>🚫 Access Blocked by FirewallShield</h1>
-        <p>Your IP (${userIP}) has been restricted by the Firewall.</p>
-      </div>`;
-    return;
-  }
+    let blocked = false;
 
-  // Block suspicious URL queries
-  const query = window.location.search.toUpperCase();
-  for (const word of blockedWords) {
-    if (query.includes(word)) {
-      document.body.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:black;color:#ff5555;font-family:sans-serif;">
-          <h1>⚠️ Suspicious Activity Detected</h1>
-          <p>Blocked due to suspicious query in URL.</p>
-        </div>`;
-      return;
+    if (blockedIPs.includes(userIP)) blocked = true;
+    else if (suspiciousRanges.some((r) => r.test(userIP))) blocked = true;
+
+    // If IP is blocked
+    if (blocked) {
+      logBlockedIP(userIP);
+      showBlockOverlay(userIP);
+    } else {
+      console.log("Access granted ✅");
     }
-  }
+  })
+  .catch(err => {
+    console.error("IP check failed:", err);
+  });
 
-  console.log("✅ Firewall check passed – site loaded safely");
-});
+// Store blocked IPs (simulated)
+function logBlockedIP(ip) {
+  let logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
+  logs.push({ ip, time: new Date().toLocaleString() });
+  localStorage.setItem("firewallLogs", JSON.stringify(logs));
+}
+
+// Animated block overlay
+function showBlockOverlay(ip) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.color = "#ff3b3b";
+  overlay.style.fontFamily = "Courier New, monospace";
+  overlay.style.zIndex = 9999;
+  overlay.style.transition = "opacity 1s ease";
+
+  overlay.innerHTML = `
+    <h1 style="font-size:2.5rem;">🚫 Access Denied</h1>
+    <p>Your IP <b>${ip}</b> has been blocked by the firewall.</p>
+    <p>Reason: Suspicious or restricted access attempt.</p>
+    <button id="view-logs" style="margin-top:20px;padding:8px 20px;border:none;border-radius:8px;background:#ff3b3b;color:#fff;cursor:pointer;">View Logs</button>
+  `;
+
+  document.body.appendChild(overlay);
+  setTimeout(() => (overlay.style.opacity = 1), 100);
+
+  document.getElementById("view-logs").addEventListener("click", () => {
+    window.location.href = "blocked.html";
+  });
+}
