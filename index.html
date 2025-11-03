@@ -35,21 +35,13 @@
     </p>
   </footer>
 
-  <!-- 🧠 Admin Access Button -->
-  <button id="adminAccess" class="admin-access">Admin Access 🔐</button>
+  <!-- Hidden Admin Unlock Button -->
+  <button id="unlockAdmin" style="position: fixed; bottom: 20px; right: 20px; background: #222; color: #fff; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer;">🔒 Admin</button>
 
-  <!-- 🧠 Hidden Sliding Admin Panel -->
-  <div id="adminPanel" class="admin-panel">
-    <h3>🛡️ Firewall Admin Panel</h3>
-    <div class="panel-section">
-      <h4>Add IP to Blocklist</h4>
-      <input type="text" id="blockIPInput" placeholder="Enter IP...">
-      <button id="blockIPBtn">Block</button>
-    </div>
-    <div class="panel-section">
-      <button id="viewLogsBtn" class="secondary">View Logs</button>
-      <button id="clearLogsBtn" class="danger">Clear Logs</button>
-    </div>
+  <!-- Hidden Admin Controls -->
+  <div id="adminControls" style="display:none; position:fixed; bottom:80px; right:20px; background:#111; color:#fff; padding:15px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.5);">
+    <button id="testFirewall" style="background:red; border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer;">🚨 Test Firewall</button>
+    <button id="addBlockedIP" style="margin-top:10px;background:#ff9900;border:none;color:white;padding:8px 15px;border-radius:6px;cursor:pointer;">➕ Block IP</button>
   </div>
 
   <script src="firewall.js"></script>
