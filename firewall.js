@@ -1,4 +1,4 @@
-// 🔥 Advanced Firewall Simulation Script
+// 🔥 Advanced Firewall Simulation Script (with Sound Effects)
 
 // Live IP Fetch
 fetch("https://api.ipify.org?format=json")
@@ -18,6 +18,7 @@ fetch("https://api.ipify.org?format=json")
 
     // If IP is blocked
     if (blocked) {
+      playAlertSound(); // 🔊 play alert sound
       logBlockedIP(userIP);
       showBlockOverlay(userIP);
     } else {
@@ -28,14 +29,21 @@ fetch("https://api.ipify.org?format=json")
     console.error("IP check failed:", err);
   });
 
-// Store blocked IPs (simulated)
+// 🧠 Store blocked IPs (simulated)
 function logBlockedIP(ip) {
   let logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
   logs.push({ ip, time: new Date().toLocaleString() });
   localStorage.setItem("firewallLogs", JSON.stringify(logs));
 }
 
-// Animated block overlay
+// 🎵 Play alert sound
+function playAlertSound() {
+  const audio = new Audio("alert.mp3"); // sound file (place it in same folder)
+  audio.volume = 0.7;
+  audio.play().catch((err) => console.warn("Audio play blocked by browser:", err));
+}
+
+// 🚫 Animated block overlay
 function showBlockOverlay(ip) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -54,7 +62,7 @@ function showBlockOverlay(ip) {
   overlay.style.transition = "opacity 1s ease";
 
   overlay.innerHTML = `
-    <h1 style="font-size:2.5rem;">🚫 Access Denied</h1>
+    <h1 style="font-size:2.5rem;">🚨 Access Denied</h1>
     <p>Your IP <b>${ip}</b> has been blocked by the firewall.</p>
     <p>Reason: Suspicious or restricted access attempt.</p>
     <button id="view-logs" style="margin-top:20px;padding:8px 20px;border:none;border-radius:8px;background:#ff3b3b;color:#fff;cursor:pointer;">View Logs</button>
