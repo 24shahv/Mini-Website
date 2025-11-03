@@ -1,141 +1,241 @@
-/* General Styling */
-body {
+/* 🌐 Global Reset */
+* {
   margin: 0;
-  font-family: "Poppins", sans-serif;
-  background: #0d0d0d;
-  color: white;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Navbar */
+body {
+  background: #0d0d0d;
+  color: #f5f5f5;
+  overflow-x: hidden;
+}
+
+/* 🔥 Navbar */
 .navbar {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: #111;
-  border-bottom: 2px solid #ff3b3b;
+  padding: 18px 60px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.4);
 }
 
 .logo {
+  color: #ff3b3b;
+  font-size: 1.5rem;
   font-weight: bold;
-  font-size: 1.4rem;
-  color: #fff;
+  letter-spacing: 1px;
 }
 
 .logo span {
-  color: #ff3b3b;
+  color: white;
 }
 
-.navbar a {
-  color: #bbb;
+.navbar nav a {
+  color: #ddd;
   text-decoration: none;
-  margin: 0 10px;
+  margin-left: 25px;
+  transition: 0.3s;
+  font-weight: 500;
 }
 
-.navbar a.active,
-.navbar a:hover {
+.navbar nav a:hover,
+.navbar nav a.active {
   color: #ff3b3b;
 }
 
-/* Hero */
+/* 🦾 Hero Section */
 .hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #1a1a1a, #0f0f0f);
+  background-image: url('firewall-bg.jpg');
+  background-size: cover;
+  background-position: center;
   text-align: center;
-  padding: 80px 20px;
+  padding: 100px 20px 0;
 }
 
-.hero h1 span {
+.hero-text {
+  max-width: 700px;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(255, 59, 59, 0.3);
+}
+
+.hero-text h1 {
+  font-size: 2.5rem;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.hero-text h1 span {
   color: #ff3b3b;
+}
+
+.hero-text p {
+  color: #ccc;
+  margin-bottom: 25px;
+  line-height: 1.6;
 }
 
 .btn {
   background: #ff3b3b;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 6px;
+  color: white;
   text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 8px;
   transition: 0.3s;
 }
 
 .btn:hover {
-  background: #ff5e5e;
+  background: #ff5959;
+  transform: scale(1.05);
 }
 
-/* Admin Access Button */
-.admin-access {
-  display: none;
+/* 📘 Info Section */
+.info {
+  padding: 80px 10%;
+  background: #111;
+  text-align: center;
+}
+
+.info h2 {
+  color: #ff3b3b;
+  margin-bottom: 15px;
+  font-size: 2rem;
+}
+
+.info p {
+  color: #ccc;
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+
+/* 🧱 Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  padding: 60px 10%;
+  background: #111;
+}
+
+.card {
+  background: #1a1a1a;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s ease;
+  box-shadow: 0 0 15px rgba(255, 59, 59, 0.15);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 25px rgba(255, 59, 59, 0.3);
+}
+
+.card h3 {
+  color: #ff3b3b;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #ccc;
+}
+
+/* ⚙️ Admin Panel */
+#adminPanel, #adminControls {
   position: fixed;
-  top: 20px;
+  bottom: 90px;
   right: 20px;
-  background: #007bff;
+  background: #111;
+  border: 1px solid #ff3b3b;
+  border-radius: 12px;
+  padding: 15px 20px;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.3);
+  z-index: 10000;
+  display: none;
+}
+
+#adminPanel h4, #adminControls h4 {
+  color: #ff3b3b;
+  margin-bottom: 10px;
+}
+
+#adminPanel input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  width: 140px;
+  margin-right: 10px;
+}
+
+#adminPanel button,
+#adminControls button {
+  background: #ff3b3b;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#adminPanel button:hover,
+#adminControls button:hover {
+  background: #ff5b5b;
+  transform: scale(1.05);
+}
+
+/* 🚨 Test Button */
+#testFirewall, #unlockAdmin {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff3b3b;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
   cursor: pointer;
   z-index: 9999;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: 0.2s;
+  display: none;
 }
 
-.admin-access:hover {
-  background: #0095ff;
+#testFirewall:hover,
+#unlockAdmin:hover {
+  background: #ff5b5b;
+  transform: scale(1.05);
 }
 
-/* Admin Panel */
-.admin-panel {
-  position: fixed;
-  top: 0;
-  right: -320px;
-  width: 300px;
-  height: 100%;
-  background: #111;
-  color: white;
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.4);
-  padding: 20px;
-  transition: right 0.4s ease;
-  z-index: 10000;
+/* 🦶 Footer */
+footer {
+  padding: 40px 0;
+  background: #0d0d0d;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
 }
 
-.admin-panel.active {
-  right: 0;
-}
-
-.admin-panel h3 {
-  margin-top: 0;
+footer a {
   color: #ff3b3b;
-  border-bottom: 1px solid #333;
-  padding-bottom: 10px;
+  text-decoration: none;
 }
 
-.panel-section {
-  margin: 20px 0;
-}
-
-.admin-panel input {
-  background: #222;
-  border: none;
-  color: white;
-  padding: 8px;
-  border-radius: 6px;
-}
-
-.admin-panel button {
-  background: #ff3b3b;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.admin-panel button.secondary {
-  background: #007bff;
-}
-
-.admin-panel button.danger {
-  background: #dc3545;
-}
-
-.admin-panel button:hover {
-  opacity: 0.9;
+footer a:hover {
+  text-decoration: underline;
 }
