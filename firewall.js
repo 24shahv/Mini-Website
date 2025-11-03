@@ -2,7 +2,7 @@
 
 // === CONFIG ===
 // Replace with your actual public IP so only you see the Admin button
-const ADMIN_IP = "REPLACE_WITH_YOUR_PUBLIC_IP";
+const ADMIN_IP = "104.28.244.253";
 
 // Static blocklist (display-only)
 const staticBlocked = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
