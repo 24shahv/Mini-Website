@@ -19,7 +19,7 @@ fetch("https://api.ipify.org?format=json")
     }
 
     // Simulate blocked IPs or suspicious patterns
-    const blockedIPs = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
+    const blockedIPs = ["192.168.1.1", "103.21.244.0", "45.90.0.1", "103.220.82.74"];
     const suspiciousRanges = [/^45\.90\./, /^103\.21\./]; // regex for IP ranges
 
     let blocked = false;
