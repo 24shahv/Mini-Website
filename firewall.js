@@ -1,39 +1,34 @@
-// 🔥 Firewall Simulation Script (Admin Unlock + Sound + IP Blocking)
+// 🔥 Advanced Firewall Simulation Script (with Admin Access Button + Sound)
 
-// 👑 Replace this with YOUR real IP (admin access)
-const ADMIN_IP = "104.28.244.253";
-
-// Static + dynamic blocklists
+// CONFIG
+const ADMIN_IP = "104.28.244.253"; // 👈 replace this with your actual IP
 const staticBlocked = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
 const suspiciousRanges = [/^45\.90\./, /^103\.21\./];
 
-// Fetch current user's IP
+// Fetch current IP
 fetch("https://api.ipify.org?format=json")
   .then(res => res.json())
   .then(data => {
     const userIP = data.ip;
-    console.log("Detected IP:", userIP);
+    console.log("User IP detected:", userIP);
 
-    // Save current IP to localStorage
-    localStorage.setItem("currentIP", userIP);
-
-    // If admin IP → enable hidden unlock button
+    // Allow admin access
     if (userIP === ADMIN_IP) {
-      document.getElementById("unlockAdmin").style.display = "block";
-      console.log("✅ Admin detected");
+      const unlockBtn = document.getElementById("unlockAdmin");
+      unlockBtn.style.display = "block";
+
+      unlockBtn.addEventListener("click", () => {
+        unlockBtn.style.display = "none";
+        document.getElementById("adminPanel").style.display = "block";
+      });
     }
 
-    // Combine all blocklists
     const dynamicBlocked = JSON.parse(localStorage.getItem("dynamicBlocked")) || [];
     const allBlocked = [...staticBlocked, ...dynamicBlocked];
 
-    // Check if user is blocked
-    const isBlocked =
-      (allBlocked.includes(userIP) ||
-        suspiciousRanges.some(r => r.test(userIP))) &&
-      userIP !== ADMIN_IP;
+    let blocked = allBlocked.includes(userIP) || suspiciousRanges.some(r => r.test(userIP));
 
-    if (isBlocked) {
+    if (blocked && userIP !== ADMIN_IP) {
       playAlertSound();
       logBlockedIP(userIP);
       showBlockOverlay(userIP);
@@ -41,48 +36,31 @@ fetch("https://api.ipify.org?format=json")
       console.log("✅ Access granted");
     }
   })
-  .catch(err => console.error("IP detection failed:", err));
-
-// 🎛️ Admin unlock system
-document.getElementById("unlockAdmin").addEventListener("click", () => {
-  const userIP = localStorage.getItem("currentIP");
-  if (userIP === ADMIN_IP) {
-    document.getElementById("adminControls").style.display = "block";
-    alert("🧠 Admin panel unlocked!");
-  } else {
-    alert("❌ Unauthorized: Only admin can unlock this panel.");
-  }
-});
+  .catch(err => console.error("IP check failed:", err));
 
 // 🧱 Add dynamic block
 document.addEventListener("DOMContentLoaded", () => {
-  const addBtn = document.getElementById("addBlockedIP");
-  if (!addBtn) return;
+  const blockBtn = document.getElementById("blockIPBtn");
+  const input = document.getElementById("blockIPInput");
 
-  addBtn.addEventListener("click", () => {
-    const ip = prompt("Enter IP to block:");
-    if (!ip) return alert("Enter a valid IP address.");
-    let dynamicBlocked = JSON.parse(localStorage.getItem("dynamicBlocked")) || [];
-    if (!dynamicBlocked.includes(ip)) {
-      dynamicBlocked.push(ip);
-      localStorage.setItem("dynamicBlocked", JSON.stringify(dynamicBlocked));
-      alert(`🚫 IP ${ip} added to blocklist!`);
-    } else {
-      alert(`⚠️ IP ${ip} already blocked.`);
-    }
-  });
-
-  // Test Firewall button
-  const testBtn = document.getElementById("testFirewall");
-  if (testBtn) {
-    testBtn.addEventListener("click", () => {
-      playAlertSound();
-      showBlockOverlay("Simulated-Blocked-IP");
+  if (blockBtn) {
+    blockBtn.addEventListener("click", () => {
+      const ip = input.value.trim();
+      if (!ip) return alert("Enter a valid IP!");
+      let dynamicBlocked = JSON.parse(localStorage.getItem("dynamicBlocked")) || [];
+      if (!dynamicBlocked.includes(ip)) {
+        dynamicBlocked.push(ip);
+        localStorage.setItem("dynamicBlocked", JSON.stringify(dynamicBlocked));
+        alert(`✅ IP ${ip} added to blocklist`);
+        input.value = "";
+      } else {
+        alert(`⚠️ IP ${ip} already blocked`);
+      }
     });
   }
 });
 
-// 🧠 Logging system
+// 🧾 Log blocked IPs
 function logBlockedIP(ip) {
   let logs = JSON.parse(localStorage.getItem("firewallLogs")) || [];
   logs.push({ ip, time: new Date().toLocaleString() });
@@ -93,27 +71,26 @@ function logBlockedIP(ip) {
 function playAlertSound() {
   const audio = new Audio("alert.mp3");
   audio.volume = 0.7;
-  audio.play().catch(() => console.warn("🔇 Autoplay blocked"));
+  audio.play().catch(err => console.warn("Audio play blocked:", err));
 }
 
-// 🚫 Overlay Display
+// 🚫 Overlay
 function showBlockOverlay(ip) {
   const overlay = document.createElement("div");
   overlay.style = `
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:black;color:#ff3b3b;
-    display:flex;flex-direction:column;justify-content:center;align-items:center;
-    font-family:'Courier New',monospace;z-index:9999;
+    background:black;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;color:#ff3b3b;
+    font-family:Courier New,monospace;z-index:9999;
   `;
   overlay.innerHTML = `
     <h1 style="font-size:2.5rem;">🚨 Access Denied</h1>
     <p>Your IP <b>${ip}</b> has been blocked by the firewall.</p>
     <p>Reason: Suspicious or restricted access attempt.</p>
-    <button id="viewLogs" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#ff3b3b;color:#fff;cursor:pointer;">View Logs</button>
+    <button id="view-logs" style="margin-top:20px;padding:8px 20px;border:none;border-radius:8px;background:#ff3b3b;color:#fff;cursor:pointer;">View Logs</button>
   `;
   document.body.appendChild(overlay);
-
-  document.getElementById("viewLogs").addEventListener("click", () => {
+  document.getElementById("view-logs").addEventListener("click", () => {
     window.location.href = "blocked.html";
   });
 }
