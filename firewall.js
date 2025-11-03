@@ -1,14 +1,14 @@
 // firewall.js
-// Simple client-side firewall simulation
+// Simple client-side firewall simulation (safe for static hosting)
 
 document.addEventListener("DOMContentLoaded", () => {
   const blockedWords = ["DROP", "SELECT", "HACK", "SCRIPT"];
-  const blockedIPs = ["203.0.113.5", "45.12.23.9"]; // fake IPs for demo
+  const blockedIPs = ["45.12.23.9"]; // fake blocked IPs
 
-  // Simulate getting user's IP (mock since browsers can't access real IPs)
-  const userIP = "203.0.113.5"; // You can change this to test
+  // Simulate user IP (random demo)
+  const userIP = "192.168.1.101"; // safe local IP placeholder
 
-  // Block if IP is in list
+  // Check if IP is in blocklist
   if (blockedIPs.includes(userIP)) {
     document.body.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:black;color:#ff5555;font-family:sans-serif;">
@@ -31,5 +31,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  console.log("✅ Firewall check passed");
+  console.log("✅ Firewall check passed – site loaded safely");
 });
