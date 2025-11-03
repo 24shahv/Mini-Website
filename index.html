@@ -35,17 +35,21 @@
     </p>
   </footer>
 
-  <!-- 🔓 Admin Access Button (Always Bottom-Right for Admin) -->
+  <!-- 🔓 Admin Access Button (bottom-right) -->
   <button id="unlockAdmin">🧠 Admin</button>
 
   <!-- 🧠 Admin Panel (Permanent once opened) -->
   <div id="adminPanel" style="display:none;">
+    <h3>Admin Control Panel</h3>
+
     <h4>Add IP to Blocklist</h4>
     <input type="text" id="blockIPInput" placeholder="Enter IP..." />
-    <button id="blockIPBtn">Block</button>
+    <button id="blockIPBtn">Block IP</button>
+
     <br><br>
-    <h4>Firewall Controls</h4>
+    <h4>Firewall Utilities</h4>
     <button id="viewLogsBtn" onclick="window.location.href='blocked.html'">View Logs</button>
+    <button id="testFirewallBtn">Test Firewall</button>
   </div>
 
   <script src="firewall.js"></script>
