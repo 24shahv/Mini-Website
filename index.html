@@ -26,7 +26,7 @@
 
   <section class="info">
     <h2>What is a Firewall?</h2>
-    <p>A firewall acts as a barrier between trusted internal networks and untrusted external networks, such as the Internet. It monitors and controls incoming and outgoing network traffic based on security rules.</p>
+    <p>A firewall acts as a barrier between trusted internal networks and untrusted external networks. It monitors and controls incoming and outgoing network traffic based on security rules.</p>
   </section>
 
   <footer>
@@ -35,12 +35,7 @@
     </p>
   </footer>
 
-  <!-- 🔓 Admin Access Button -->
-  <button id="unlockAdmin" style="display:none; position:fixed; right:20px; bottom:20px; background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; z-index:9999;">
-    🧠 Admin
-  </button>
-
-  <!-- 🧠 Admin Panel -->
+  <!-- 🧠 Admin Panel (Always visible for admin IP) -->
   <div id="adminPanel" style="display:none; position:fixed; right:20px; bottom:80px; width:360px; max-height:70vh; overflow:auto; background:#0b0b0b; border:1px solid #333; border-radius:10px; padding:14px; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.6); color:#fff;">
     <h3 style="margin:0 0 10px;color:#ff3b3b;">Admin Control Panel</h3>
 
@@ -60,10 +55,12 @@
     </div>
 
     <p style="font-size:12px; color:#bbb; margin-top:10px;">Static rules cannot be removed here. Dynamic blocks and logs are stored in your browser (localStorage).</p>
-
-    <!-- Admin Test Button -->
-    <button id="testFirewall" style="margin-top:12px; background:red; color:white; padding:8px 14px; border:none; border-radius:8px; cursor:pointer;">🚨 Test Firewall</button>
   </div>
+
+  <!-- 👑 Admin Button (bottom-right) -->
+  <button id="unlockAdmin" style="display:none; position:fixed; right:20px; bottom:20px; background:#222; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; z-index:9999;">
+    👑 Admin
+  </button>
 
   <script src="firewall.js"></script>
 </body>
