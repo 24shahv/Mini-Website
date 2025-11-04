@@ -1,21 +1,21 @@
 // ==========================
 // 🚫 PRE-LOADING IP BLOCK REDIRECT
 // ==========================
-fetch('https://api.ipify.org?format=json')
-  .then(res => res.json())
-  .then(data => {
-    const blockedIPs = [
-      "117.240.136.4" // Add more IPs here if needed
-    ];
+(function() {
+  const blockedIPs = ["117.240.136.4"]; // Add more IPs here if needed
 
-    console.log("Visitor IP:", data.ip);
-
-    if (blockedIPs.includes(data.ip)) {
-      // Redirect blocked user to blocked.html before anything loads
-      window.location.href = "blocked.html";
-    }
-  })
-  .catch(err => console.error("⚠️ Firewall pre-check failed:", err));
+  // Run early before the page loads
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => {
+      console.log("Visitor IP (pre-check):", data.ip);
+      if (blockedIPs.includes(data.ip)) {
+        // 🚷 Redirect to blocked.html
+        window.location.replace("blocked.html");
+      }
+    })
+    .catch(err => console.error("⚠️ Firewall pre-check failed:", err));
+})();
 
 
 // ==========================
@@ -166,4 +166,3 @@ function initFirewall(userIP) {
 
   refreshAdminPanel();
 }
-
