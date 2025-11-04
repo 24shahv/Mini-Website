@@ -36,8 +36,61 @@
   </footer>
 
   <!-- 🧠 Admin Panel (Always visible for admin IP) -->
-  <div id="adminPanel" style="display:none; position:fixed; right:20px; bottom:80px; width:360px; max-height:70vh; overflow:auto; background:#0b0b0b; border:1px solid #333; border-radius:10px; padding:14px; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.6); color:#fff;">
-    <h3 style="margin:0 0 10px;color:#ff3b3b;">Admin Control Panel</h3>
+  <div id="adminPanel" style="
+  display:none;
+  position:fixed;
+  right:20px;
+  bottom:80px;
+  width:360px;
+  max-height:70vh;
+  overflow:auto;
+  background:#0b0b0b;
+  border:1px solid #333;
+  border-radius:10px;
+  padding:14px;
+  z-index:9999;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  color:#fff;
+  font-family:monospace;
+">
+  <h3 style="margin:0 0 10px;color:#ff3b3b;">Admin Control Panel</h3>
+
+  <div style="margin-bottom:10px;">
+    <b style="color:#ff7b7b;">Blocked IPs</b>
+    <div id="blockedList" style="margin-top:5px;font-size:14px;color:#ccc;">
+      <i>No blocked IPs</i>
+    </div>
+  </div>
+
+  <div style="margin-bottom:10px;">
+    <b style="color:#ff7b7b;">Blocked Logs (recent)</b>
+    <div id="logsList" style="margin-top:5px;font-size:14px;color:#ccc;">
+      <i>No logs yet</i>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button id="refreshAdmin" style="flex:1;padding:6px;background:#ff3b3b;color:#fff;border:none;border-radius:6px;cursor:pointer;">Refresh</button>
+    <button id="clearDynamic" style="flex:1;padding:6px;background:#444;color:#fff;border:none;border-radius:6px;cursor:pointer;">Clear Dynamic</button>
+  </div>
+
+  <hr style="border:1px solid #222;margin:15px 0;">
+
+  <label style="color:#ff4b4b;font-weight:bold;">Manage IPs</label>
+  <div style="margin-top:8px;">
+    <input id="addIP" type="text" placeholder="Enter IP address"
+      style="padding:6px;width:100%;border:none;border-radius:6px;margin-bottom:8px;background:#1a1a1a;color:#fff;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="addIPBtn" style="flex:1;padding:6px;background:#ff3b3b;color:white;border:none;border-radius:6px;cursor:pointer;">Add IP</button>
+      <button id="removeIPBtn" style="flex:1;padding:6px;background:#555;color:white;border:none;border-radius:6px;cursor:pointer;">Unblock</button>
+      <button id="testFirewall" style="flex:1;padding:6px;background:#ff9b3b;color:black;border:none;border-radius:6px;cursor:pointer;">Test Firewall</button>
+    </div>
+  </div>
+
+  <p style="margin-top:15px;font-size:12px;color:#888;">
+    Static rules cannot be removed here. Dynamic blocks and logs are stored in your browser (localStorage).
+  </p>
+</div>
 
     <section style="margin-bottom:12px;">
       <strong>Blocked IPs</strong>
@@ -65,3 +118,4 @@
   <script src="firewall.js"></script>
 </body>
 </html>
+
