@@ -2,20 +2,18 @@
 // 🔥 FIREWALL SECURITY SCRIPT
 // ==========================
 
-// 1️⃣ EARLY BLOCK CHECK
+// Fetch user's public IP
 fetch("https://api.ipify.org?format=json")
   .then(res => res.json())
   .then(data => {
     const userIP = data.ip;
     console.log("User IP detected:", userIP);
 
-    // Static and dynamic block lists
-    const staticBlocked = ["45.90.0.1", "103.21.244.0"]; // manual
+    const staticBlocked = ["45.90.0.1", "103.21.244.0"]; // Predefined blocked IPs
     const dynamicBlocked = JSON.parse(localStorage.getItem("blockedIPs") || "[]");
-
-    // Combined check
     const isBlocked = staticBlocked.includes(userIP) || dynamicBlocked.includes(userIP);
 
+    // If blocked, show Access Denied screen
     if (isBlocked) {
       document.body.innerHTML = `
         <div style="
@@ -28,7 +26,7 @@ fetch("https://api.ipify.org?format=json")
           color:#ff3b3b;
           font-family:monospace;
           text-align:center;">
-          <h1>🚫 Access Denied</h1>
+          <h1>🚫 ACCESS DENIED</h1>
           <p>Your IP: <b>${userIP}</b> has been blocked by the firewall.</p>
           <p>Reason: Suspicious or restricted access attempt.</p>
         </div>
@@ -36,19 +34,20 @@ fetch("https://api.ipify.org?format=json")
       throw new Error("Access denied by firewall");
     }
 
-    // ✅ If not blocked, continue normal logic
+    // ✅ Continue if not blocked
     initFirewall(userIP);
   })
   .catch(err => console.warn("Firewall check failed:", err));
 
-
-// 2️⃣ MAIN FIREWALL FUNCTION
+// ==========================
+// MAIN FIREWALL FUNCTION
+// ==========================
 function initFirewall(userIP) {
-  const adminIP = "104.28.212.247"; // Replace with your own public IP
+  const adminIP = "104.28.212.247"; // Replace this with your actual IP
   const unlockAdmin = document.getElementById("unlockAdmin");
   const adminPanel = document.getElementById("adminPanel");
 
-  // Show Admin Button only to admin
+  // Show admin button only for your IP
   fetch("https://api.ipify.org?format=json")
     .then(res => res.json())
     .then(ipData => {
@@ -57,49 +56,40 @@ function initFirewall(userIP) {
       }
     });
 
+  // Admin panel unlock
   unlockAdmin.addEventListener("click", () => {
     adminPanel.style.display = "block";
   });
 
-  // Sound Alert function
+  // --- Helper Functions ---
+
+  // 🔔 Sound Alert
   function playAlertSound() {
     const audio = new Audio("alert.mp3");
-    audio.volume = 0.7;
+    audio.volume = 0.6;
     audio.play().catch(err => console.warn("Sound blocked:", err));
   }
 
-  // Log Blocked IPs
+  // 🧾 Log Blocked IPs
   function logBlockedIP(ip) {
     let logs = JSON.parse(localStorage.getItem("firewallLogs") || "[]");
     logs.push({ ip, time: new Date().toLocaleString() });
     localStorage.setItem("firewallLogs", JSON.stringify(logs));
   }
 
-  // Add Dynamic Block
+  // 🚫 Block IP Dynamically
   function blockIP(ip) {
     let blocked = JSON.parse(localStorage.getItem("blockedIPs") || "[]");
-    if (!blocked.includes(ip)) blocked.push(ip);
-    localStorage.setItem("blockedIPs", JSON.stringify(blocked));
-    logBlockedIP(ip);
-    playAlertSound();
-    refreshAdminPanel();
+    if (!blocked.includes(ip)) {
+      blocked.push(ip);
+      localStorage.setItem("blockedIPs", JSON.stringify(blocked));
+      logBlockedIP(ip);
+      playAlertSound();
+      refreshAdminPanel();
+    }
   }
 
-  // Admin Controls
-  document.getElementById("testFirewall").addEventListener("click", () => {
-    alert("Simulating Firewall Block on your IP!");
-    blockIP(userIP);
-  });
-
-  document.getElementById("refreshAdmin").addEventListener("click", refreshAdminPanel);
-
-  document.getElementById("clearDynamic").addEventListener("click", () => {
-    localStorage.removeItem("blockedIPs");
-    alert("Dynamic blocks cleared.");
-    refreshAdminPanel();
-  });
-
-  // Refresh Admin Panel Info
+  // 🔁 Refresh Admin Panel Data
   function refreshAdminPanel() {
     const blockedList = document.getElementById("blockedList");
     const logsList = document.getElementById("logsList");
@@ -112,9 +102,33 @@ function initFirewall(userIP) {
       : "<i>No blocked IPs</i>";
 
     logsList.innerHTML = logs.length
-      ? logs.slice(-5).map(l => `${l.ip} — ${l.time}`).join("<br>")
+      ? logs
+          .slice(-8)
+          .reverse()
+          .map(l => `<div>${l.ip} — <small>${l.time}</small></div>`)
+          .join("")
       : "<i>No logs yet</i>";
   }
 
+  // 🧹 Clear Dynamic Blocks
+  document.getElementById("clearDynamic").addEventListener("click", () => {
+    localStorage.removeItem("blockedIPs");
+    alert("✅ Dynamic blocks cleared.");
+    refreshAdminPanel();
+  });
+
+  // 🔁 Refresh Button
+  document.getElementById("refreshAdmin").addEventListener("click", refreshAdminPanel);
+
+  // 🧪 Optional: Simulate Firewall Test (if test button exists)
+  const testBtn = document.getElementById("testFirewall");
+  if (testBtn) {
+    testBtn.addEventListener("click", () => {
+      alert("Simulating firewall block for your IP!");
+      blockIP(userIP);
+    });
+  }
+
+  // Initialize panel view
   refreshAdminPanel();
 }
