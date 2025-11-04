@@ -1,15 +1,14 @@
-// 🔥 Firewall Simulation + Admin Controls + Toast Notifications
+// 🔥 Firewall Simulation + Admin Controls + Visitor Logging
 
 // === CONFIG ===
-const ADMIN_IP = "104.28.212.247"; // ← replace with your actual public IP
-
-// Static blocked IPs
+const ADMIN_IP = "104.28.212.247"; // Replace with your real IP
 const staticBlocked = ["192.168.1.1", "103.21.244.0", "45.90.0.1"];
 const suspiciousRanges = [/^45\.90\./, /^103\.21\./];
 
 // Storage keys
 const LS_DYNAMIC = "dynamicBlocked";
 const LS_LOGS = "firewallLogs";
+const LS_VISITORS = "visitorList";
 const LS_CURRENT = "currentIP";
 
 // === MAIN ===
@@ -17,20 +16,22 @@ const LS_CURRENT = "currentIP";
   try {
     const ipRes = await fetch("https://api.ipify.org?format=json");
     const { ip } = await ipRes.json();
-    console.log("Detected public IP:", ip);
     localStorage.setItem(LS_CURRENT, ip);
+    console.log("Detected public IP:", ip);
+
+    logVisitor(ip); // ✅ Log every visitor automatically
 
     // Show admin button if IP matches
-    if (ip === ADMIN_IP) {
-      const unlock = document.getElementById("unlockAdmin");
+    const unlock = document.getElementById("unlockAdmin");
+    if (ip === ADMIN_IP && unlock) {
       unlock.style.display = "block";
       unlock.addEventListener("click", toggleAdminPanel);
       showToast(`👑 Admin access granted (${ip})`, "green");
     } else {
-      showToast(`🌐 Visitor IP detected: ${ip}`, "blue");
+      showToast(`🌐 Visitor: ${ip}`, "blue");
     }
 
-    // Check firewall blocks
+    // Check blocks
     const dynamic = JSON.parse(localStorage.getItem(LS_DYNAMIC)) || [];
     const allBlocked = [...staticBlocked, ...dynamic];
     const isBlocked =
@@ -48,48 +49,56 @@ const LS_CURRENT = "currentIP";
   }
 })();
 
+// === VISITOR LOGGER ===
+function logVisitor(ip) {
+  let visitors = JSON.parse(localStorage.getItem(LS_VISITORS)) || [];
+  const exists = visitors.find(v => v.ip === ip);
+  if (!exists) {
+    visitors.push({ ip, time: new Date().toLocaleString() });
+    localStorage.setItem(LS_VISITORS, JSON.stringify(visitors));
+  }
+}
+
 // === ADMIN PANEL TOGGLE ===
 function toggleAdminPanel() {
   const panel = document.getElementById("adminPanel");
-  if (panel.style.display === "none" || !panel.style.display) {
-    panel.style.display = "block";
-    renderAdmin();
-    showToast("🛠 Admin panel opened", "green");
-  } else {
-    panel.style.display = "none";
-    showToast("❌ Admin panel closed", "gray");
-  }
+  if (!panel) return;
+  panel.style.display = "block"; // Always visible once opened
+  renderAdmin();
+  showToast("🛠 Admin panel opened", "green");
 }
 
 // === ADMIN RENDERING ===
 function renderAdmin() {
   renderBlockedList();
   renderLogs();
+  renderVisitors();
   renderButtons();
 }
 
+// === Blocked List ===
 function renderBlockedList() {
   const container = document.getElementById("blockedList");
+  if (!container) return;
   container.innerHTML = "";
 
   const dynamic = JSON.parse(localStorage.getItem(LS_DYNAMIC)) || [];
-
   container.innerHTML += `<em style="color:#ffb0a0;">Static rules:</em><br>`;
   staticBlocked.forEach(ip => {
-    container.innerHTML += `<div style="color:#ff6b6b; margin:4px 0;">${ip} <small style="opacity:0.6;">(static)</small></div>`;
+    container.innerHTML += `<div style="color:#ff6b6b;">${ip}</div>`;
   });
 
   if (dynamic.length > 0) {
     container.innerHTML += `<br><em style="color:#ffd8b0;">Dynamic rules:</em><br>`;
     dynamic.forEach(ip => {
       container.innerHTML += `
-        <div style="margin:4px 0; display:flex; justify-content:space-between;">
+        <div style="display:flex;justify-content:space-between;margin:4px 0;">
           <span>${ip}</span>
-          <button class="unblockBtn" data-ip="${ip}" style="background:#444; color:#fff; border:none; padding:3px 6px; border-radius:5px; cursor:pointer;">Unblock</button>
+          <button class="unblockBtn" data-ip="${ip}" style="background:#444;color:#fff;border:none;padding:3px 6px;border-radius:5px;">Unblock</button>
         </div>`;
     });
   } else {
-    container.innerHTML += `<div style="color:#aaa; margin-top:8px;">No dynamic IPs.</div>`;
+    container.innerHTML += `<div style="color:#aaa;">No dynamic IPs.</div>`;
   }
 
   document.querySelectorAll(".unblockBtn").forEach(btn => {
@@ -102,42 +111,50 @@ function renderBlockedList() {
   });
 }
 
+// === Logs ===
 function renderLogs() {
   const logs = JSON.parse(localStorage.getItem(LS_LOGS)) || [];
   const container = document.getElementById("logsList");
-  container.innerHTML = "";
-
-  if (logs.length === 0) {
-    container.innerHTML = "<div style='color:#aaa;'>No logs yet.</div>";
-    return;
-  }
-
-  logs.slice(-30).reverse().forEach(log => {
-    container.innerHTML += `
-      <div style="margin:4px 0; display:flex; justify-content:space-between;">
-        <div>${log.ip}<br><small style="opacity:0.6;">${log.time}</small></div>
-        <button class="removeLogBtn" data-ip="${log.ip}" data-time="${log.time}" style="background:#333; color:#fff; border:none; padding:3px 6px; border-radius:5px;">X</button>
-      </div>`;
-  });
-
-  document.querySelectorAll(".removeLogBtn").forEach(btn => {
-    btn.addEventListener("click", e => {
-      removeLog(e.target.dataset.ip, e.target.dataset.time);
-      showToast(`🗑 Log removed`, "gray");
-      renderAdmin();
-    });
-  });
+  if (!container) return;
+  container.innerHTML = logs.length
+    ? logs
+        .slice(-20)
+        .reverse()
+        .map(
+          log => `<div>${log.ip}<br><small>${log.time}</small></div>`
+        )
+        .join("")
+    : "<div style='color:#aaa;'>No logs yet.</div>";
 }
 
+// === Visitors ===
+function renderVisitors() {
+  const container = document.getElementById("visitorList");
+  if (!container) return;
+  const visitors = JSON.parse(localStorage.getItem(LS_VISITORS)) || [];
+  if (visitors.length === 0) {
+    container.innerHTML = "<div style='color:#aaa;'>No visitors yet.</div>";
+    return;
+  }
+  container.innerHTML = visitors
+    .slice(-50)
+    .reverse()
+    .map(
+      v => `<div style="margin:3px 0;">${v.ip}<br><small>${v.time}</small></div>`
+    )
+    .join("");
+}
+
+// === Buttons ===
 function renderButtons() {
   const panel = document.getElementById("adminPanel");
   if (!panel.querySelector("#adminTools")) {
     const div = document.createElement("div");
     div.id = "adminTools";
-    div.style.marginTop = "12px";
+    div.style.marginTop = "10px";
     div.innerHTML = `
-      <button id="testFirewallBtn" style="background:#ff3b3b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Test Firewall 🚨</button>
-      <button id="blockIPBtn" style="background:#666; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; margin-left:6px;">Block IP ➕</button>
+      <button id="testFirewallBtn" style="background:#ff3b3b;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">Test Firewall 🚨</button>
+      <button id="blockIPBtn" style="background:#666;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:6px;">Block IP ➕</button>
     `;
     panel.appendChild(div);
 
@@ -158,7 +175,7 @@ function renderButtons() {
   }
 }
 
-// === DATA HANDLERS ===
+// === Data Functions ===
 function addDynamicIP(ip) {
   const data = JSON.parse(localStorage.getItem(LS_DYNAMIC)) || [];
   if (!data.includes(ip)) {
@@ -166,26 +183,18 @@ function addDynamicIP(ip) {
     localStorage.setItem(LS_DYNAMIC, JSON.stringify(data));
   }
 }
-
 function removeDynamicIP(ip) {
   const data = JSON.parse(localStorage.getItem(LS_DYNAMIC)) || [];
   const updated = data.filter(x => x !== ip);
   localStorage.setItem(LS_DYNAMIC, JSON.stringify(updated));
 }
-
 function addLog(ip) {
   const logs = JSON.parse(localStorage.getItem(LS_LOGS)) || [];
   logs.push({ ip, time: new Date().toLocaleString() });
   localStorage.setItem(LS_LOGS, JSON.stringify(logs));
 }
 
-function removeLog(ip, time) {
-  let logs = JSON.parse(localStorage.getItem(LS_LOGS)) || [];
-  logs = logs.filter(l => !(l.ip === ip && l.time === time));
-  localStorage.setItem(LS_LOGS, JSON.stringify(logs));
-}
-
-// === ALERT UI ===
+// === Alert + UI ===
 function playAlertSound() {
   const audio = new Audio("alert.mp3");
   audio.volume = 0.7;
@@ -194,48 +203,56 @@ function playAlertSound() {
 
 function showBlockOverlay(ip) {
   const overlay = document.createElement("div");
-  overlay.style.position = "fixed";
-  overlay.style.top = "0";
-  overlay.style.left = "0";
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.background = "rgba(0,0,0,0.95)";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.justifyContent = "center";
-  overlay.style.alignItems = "center";
-  overlay.style.zIndex = "9999";
-  overlay.style.color = "#ff4d4d";
-  overlay.style.fontFamily = "monospace";
+  Object.assign(overlay.style, {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.95)",
+    color: "#ff4d4d",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+    fontFamily: "monospace",
+  });
   overlay.innerHTML = `
     <h1>🚫 Access Denied</h1>
-    <p>Your IP: <strong style="color:#fff;">${ip}</strong></p>
-    <button onclick="location.href='blocked.html'" style="background:#ff3b3b; color:#fff; border:none; padding:8px 14px; border-radius:6px; margin-top:10px;">View Logs</button>
+    <p>Your IP: <b style="color:white;">${ip}</b></p>
+    <button onclick="location.href='blocked.html'" style="background:#ff3b3b;color:#fff;border:none;padding:8px 14px;border-radius:6px;">View Logs</button>
   `;
   document.body.appendChild(overlay);
 }
 
-// === TOAST NOTIFICATIONS ===
+// === Toasts ===
 function showToast(msg, color = "gray") {
   const toast = document.createElement("div");
   toast.textContent = msg;
-  toast.style.position = "fixed";
-  toast.style.bottom = "20px";
-  toast.style.right = "20px";
-  toast.style.background =
-    color === "red" ? "#ff4d4d" :
-    color === "green" ? "#4caf50" :
-    color === "blue" ? "#2196f3" :
-    color === "yellow" ? "#ff9800" : "#555";
-  toast.style.color = "#fff";
-  toast.style.padding = "10px 15px";
-  toast.style.borderRadius = "8px";
-  toast.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
-  toast.style.zIndex = "999999";
-  toast.style.fontFamily = "monospace";
-  toast.style.opacity = "0";
-  toast.style.transition = "opacity 0.4s ease";
-
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    background:
+      color === "red"
+        ? "#ff4d4d"
+        : color === "green"
+        ? "#4caf50"
+        : color === "blue"
+        ? "#2196f3"
+        : color === "yellow"
+        ? "#ff9800"
+        : "#555",
+    color: "#fff",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+    zIndex: "999999",
+    fontFamily: "monospace",
+    opacity: "0",
+    transition: "opacity 0.4s ease",
+  });
   document.body.appendChild(toast);
   setTimeout(() => (toast.style.opacity = "1"), 50);
   setTimeout(() => {
@@ -243,6 +260,3 @@ function showToast(msg, color = "gray") {
     setTimeout(() => toast.remove(), 400);
   }, 4000);
 }
-
-// === EXPORT ===
-window.__firewall = { addDynamicIP, removeDynamicIP, renderAdmin, showToast };
