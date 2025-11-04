@@ -2,18 +2,19 @@
 // 🔥 FIREWALL SECURITY SCRIPT
 // ==========================
 
-fetch("https://api.ipify.org?format=json")
+// 🚫 Instant IP check before anything else
+fetch('https://api.ipify.org?format=json')
   .then(res => res.json())
   .then(data => {
-    const userIP = data.ip;
-    console.log("User IP detected:", userIP);
+    const blockedIPs = ["117.240.136.4"]; // Add more if needed
+    console.log("Visitor IP:", data.ip);
+    if (blockedIPs.includes(data.ip)) {
+      // Redirect immediately before loading the rest of the site
+      window.location.href = "blocked.html";
+    }
+  })
+  .catch(err => console.error("⚠️ Firewall pre-check failed:", err));
 
-    // 🧱 Static Blocked IPs
-    const staticBlocked = [
-      "45.90.0.1",
-      "103.21.244.0",
-      "117.240.136.4" // Blocked as requested
-    ];
 
     // 🧱 Dynamic Blocked IPs (stored locally)
     const dynamicBlocked = JSON.parse(localStorage.getItem("blockedIPs") || "[]");
