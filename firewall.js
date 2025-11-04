@@ -44,7 +44,7 @@ fetch("https://api.ipify.org?format=json")
 
 // 2️⃣ MAIN FIREWALL FUNCTION
 function initFirewall(userIP) {
-  const adminIP = "YOUR_ADMIN_IP"; // Replace with your own public IP
+  const adminIP = "104.28.212.247"; // Replace with your own public IP
   const unlockAdmin = document.getElementById("unlockAdmin");
   const adminPanel = document.getElementById("adminPanel");
 
